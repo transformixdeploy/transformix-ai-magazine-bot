@@ -1,0 +1,46 @@
+version: '3.8'
+
+# Use a unique project name to avoid conflicts with other Docker projects
+# You can override this with: docker-compose -p ai-news-bot up
+name: ai-news-bot
+
+services:
+  ai-news-bot:
+    build: 
+      context: .
+      dockerfile: dockerfile
+    container_name: ai-news-bot-container
+    restart: unless-stopped
+    environment:
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+      - NEWSAPI_KEY=${NEWSAPI_KEY}
+      - GNEWS_API_KEY=${GNEWS_API_KEY}
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+      - PYTHONUNBUFFERED=1
+    volumes:
+      # Use project-specific volume names to avoid conflicts
+      - ai-news-bot-logs:/app/logs
+      - ai-news-bot-blogs:/app/weekly_blogs
+    # Use isolated network to avoid conflicts with other projects
+    networks:
+      - ai-news-bot-network
+    # Health check (optional)
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('https://api.telegram.org')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# Named volumes (isolated from other projects)
+volumes:
+  ai-news-bot-logs:
+    driver: local
+  ai-news-bot-blogs:
+    driver: local
+
+# Isolated network
+networks:
+  ai-news-bot-network:
+    driver: bridge
+

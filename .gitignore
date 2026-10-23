@@ -1,0 +1,9 @@
+# Secrets: real values live only on the server (/home/ubuntu/ai_news/.env)
+.env
+.env.*
+!.env.example
+
+__pycache__/
+*.pyc
+logs/
+weekly_blogs/

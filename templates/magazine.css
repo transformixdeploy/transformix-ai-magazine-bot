@@ -1,0 +1,368 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap');
+
+:root {
+    --primary-color: #0f172a;
+    --secondary-color: #334155;
+    --accent-color: #3b82f6;
+    --accent-light: #60a5fa;
+    --text-color: #1e293b;
+    --bg-color: #f8fafc;
+    --paper-white: #ffffff;
+    --gradient-cover: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+@page {
+    size: A4;
+    margin: 1.5cm 1.5cm 2cm 1.5cm;
+    /* Improved margin for all pages */
+
+    @bottom-center {
+        content: "Transfermix AI Report • " counter(page);
+        font-family: 'Inter', sans-serif;
+        font-size: 8pt;
+        color: #94a3b8;
+    }
+}
+
+@page :first {
+    @top-right {
+        content: none;
+    }
+
+    @bottom-center {
+        content: none;
+    }
+
+    margin: 0;
+}
+
+@page cover {
+    margin: 0;
+
+    @top-right {
+        content: none;
+    }
+
+    @bottom-center {
+        content: none;
+    }
+}
+
+body {
+    font-family: 'Merriweather', serif;
+    color: var(--text-color);
+    background-color: white;
+    /* Changed from var(--bg-color) to avoid gray box at bottom */
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Inter', sans-serif;
+    color: var(--primary-color);
+    margin-top: 0;
+}
+
+p {
+    margin-bottom: 1em;
+    font-size: 10pt;
+    text-align: justify;
+}
+
+/* Cover Page */
+/* Cover Page */
+.cover-page {
+    page: cover;
+    width: 210mm;
+    height: 297mm;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+
+    /* Remove flex — this was breaking the layout */
+    display: block;
+}
+
+
+
+.cover-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(15, 23, 42, 0.4) 0%, rgba(15, 23, 42, 0.9) 100%);
+    z-index: 1;
+}
+
+.cover-content {
+    padding-top: 380px !important;
+    /* push text lower */
+    padding-left: 2cm;
+    padding-right: 2cm;
+}
+
+.magazine-brand {
+    margin-bottom: 2cm;
+}
+
+.cover-title {
+    font-size: 52pt;
+    font-weight: 800;
+    line-height: 1.0;
+    margin-bottom: 0.5cm;
+    color: white;
+    /* text-shadow removed for WeasyPrint compatibility */
+}
+
+.cover-subtitle {
+    font-size: 18pt;
+    font-weight: 300;
+    color: #e2e8f0;
+    max-width: 80%;
+}
+
+.cover-date {
+    font-family: 'Inter', sans-serif;
+    font-size: 12pt;
+    color: #cbd5e1;
+    margin-top: 2cm;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    padding-top: 0.5cm;
+    display: inline-block;
+}
+
+.cover-highlights {
+    background: rgba(255, 255, 255, 0.1);
+    /* backdrop-filter removed */
+    padding: 1.5cm;
+    border-radius: 12px;
+    border-left: 4px solid var(--accent-light);
+    /* Ensure content fits */
+    height: auto;
+    min-height: 200px;
+}
+
+.highlight-item {
+    margin-bottom: 0.8cm;
+}
+
+.highlight-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 14pt;
+    font-weight: 700;
+    color: white;
+    display: block;
+}
+
+.highlight-desc {
+    font-family: 'Inter', sans-serif;
+    font-size: 10pt;
+    color: #cbd5e1;
+    font-weight: 300;
+}
+
+/* Table of Contents */
+.toc-page {
+    page-break-after: always;
+    padding: 2cm;
+    background-color: white;
+}
+
+.section-header {
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 10px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.section-title {
+    font-size: 24pt;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.toc-list {
+    list-style: none;
+    padding: 0;
+}
+
+.toc-item {
+    margin-bottom: 15px;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 5px;
+}
+
+.toc-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    /* Ensures number sits exactly on the text baseline */
+    text-decoration: none;
+    color: inherit;
+    width: 100%;
+}
+
+.toc-link::after {
+    /* Optional: dotted leader code if desired, but sticking to user request for now */
+    content: "";
+}
+
+.toc-text {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 12pt;
+}
+
+.toc-page-num::after {
+    content: target-counter(attr(data-target), page);
+    font-family: 'Inter', sans-serif;
+    color: var(--accent-color);
+    font-weight: 700;
+}
+
+/* Editor's Note */
+.editors-note {
+    background-color: #f1f5f9;
+    padding: 1.5cm;
+    margin: 1cm 2cm;
+    border-radius: 8px;
+    page-break-after: always;
+}
+
+.editors-photo {
+    width: 60px;
+    height: 60px;
+    background-color: #cbd5e1;
+    border-radius: 50%;
+    margin-bottom: 15px;
+}
+
+/* Article Layouts */
+.article-page {
+    /* Padding removed as it's now handled by @page margins */
+    background-color: white;
+    page-break-after: always;
+}
+
+.article-header {
+    margin-bottom: 0.8cm;
+}
+
+.article-category {
+    font-family: 'Inter', sans-serif;
+    font-size: 9pt;
+    text-transform: uppercase;
+    color: var(--accent-color);
+    font-weight: 700;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.article-title {
+    font-size: 24pt;
+    /* Reduced from 28pt */
+    line-height: 1.1;
+    margin-bottom: 10px;
+    color: var(--primary-color);
+}
+
+.article-meta {
+    font-family: 'Inter', sans-serif;
+    font-size: 9pt;
+    color: #64748b;
+    border-left: 3px solid var(--accent-color);
+    padding-left: 10px;
+}
+
+.article-content {
+    column-count: 2;
+    column-gap: 0.8cm;
+    text-align: justify;
+}
+
+/* ... existing H2/H3/P styles ... */
+
+.featured-image-container {
+    width: 100%;
+    height: 180px;
+    /* Reduced from 200px */
+    background-color: #e2e8f0;
+    margin-bottom: 0.8cm;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.featured-image-text {
+    color: #64748b;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Special Sections */
+.market-watch {
+    background-color: #0f172a;
+    color: white;
+    padding: 2cm;
+}
+
+.market-watch h2 {
+    color: white;
+}
+
+.market-watch p {
+    color: #94a3b8;
+}
+
+.stat-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.stat-card {
+    flex: 1;
+    min-width: 150px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-value {
+    font-family: 'Inter', sans-serif;
+    font-size: 24pt;
+    font-weight: 800;
+    color: var(--accent-light);
+}
+
+.stat-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 9pt;
+    color: #cbd5e1;
+}
+
+/* Footer Section */
+.magazine-footer {
+    border-top: 1px solid #e2e8f0;
+    padding-top: 1cm;
+    margin-top: 2cm;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 8pt;
+    color: #94a3b8;
+}
