@@ -2635,18 +2635,22 @@ def generate_magazine_content_with_ai(articles, api_key=None):
     for i, article in enumerate(articles[:40]):  # Limit to 40 articles for context
         title = article.get('title', 'No title')
         content = article.get('full_content', '')[:1000] # Truncate for token limits
-        articles_context += f"Article {i+1}: {title}\nContent: {content}\n\n"
+        source = article.get('source')
+        source = (source.get('name') if isinstance(source, dict) else source) or 'Unknown'
+        articles_context += f"Article {i+1}: {title}\nSource: {source}\nContent: {content}\n\n"
 
     system_message = (
         "You are the Editor-in-Chief of 'Transformix AI Report', a premium monthly AI magazine. "
         "Your goal is to sustain a professional, insightful, and visionary tone. "
-        "CRITICAL PAGE LAYOUT RULE: EVERY article (including the first one) must fit exactly on ONE A4 page. "
-        "NO EXCEPTIONS - ALL 8 articles must be between 350-400 words TOTAL (lead + main content). "
-        "STRICT ENFORCEMENT: Count words for EACH article. If any article exceeds 400 words, it will overflow the page. "
-        "If any article is below 350 words, it will have excessive whitespace. "
-        "Aim for 360-380 words per article for optimal page fill without overflow. "
+        "CRITICAL PAGE LAYOUT RULE: EVERY article (including the first one) must fit exactly on ONE A4 page, "
+        "in ONE column under a large photo. "
+        "NO EXCEPTIONS - ALL 8 articles must be between 230-260 words TOTAL (lead + main content). "
+        "STRICT ENFORCEMENT: Count words for EACH article. If any article exceeds 260 words, it will overflow the page. "
+        "If any article is below 230 words, it will have excessive whitespace. "
+        "Aim for 240-255 words per article for optimal page fill without overflow. "
         "The first article is NOT special - it must follow the same word count rules as all other articles. "
-        "Balance depth with brevity - provide comprehensive coverage but stay within the strict 350-400 word limit. "
+        "Balance depth with brevity - provide comprehensive coverage but stay within the strict 230-260 word limit. "
+        "Each article must be based on a DIFFERENT source article. "
         "Output ONLY valid JSON matching the specified structure."
     )
 
@@ -2656,15 +2660,16 @@ def generate_magazine_content_with_ai(articles, api_key=None):
 
     Return a JSON object with this exact structure (no markdown, just JSON):
     {{
-        "title": "AI Monthly: [Catchy Title]",
-        "subtitle": "[Engaging Subtitle]",
+        "title": "[Catchy cover headline, max 6 words, no 'AI Monthly' prefix]",
+        "subtitle": "[Engaging Subtitle, max 20 words]",
         "date": "[Current Month Year]",
+        "cover_image_query": "[3-5 English words for a striking, abstract technology photo for the cover, e.g. glowing neural network dark]",
         "highlights": [
-            {{"title": "[Highlight 1]", "description": "[Short description]"}},
-            {{"title": "[Highlight 2]", "description": "[Short description]"}},
-            {{"title": "[Highlight 3]", "description": "[Short description]"}}
+            {{"title": "[Highlight 1, 1-3 words]", "description": "[Max 12 words]"}},
+            {{"title": "[Highlight 2, 1-3 words]", "description": "[Max 12 words]"}},
+            {{"title": "[Highlight 3, 1-3 words]", "description": "[Max 12 words]"}}
         ],
-        "editors_note": "[STRICTLY MAX 200 words. 2 paragraphs of visionary editorial commentary aimed to fit on a single page. Formatted with HTML <p> tags]",
+        "editors_note": "[STRICTLY MAX 180 words. 2 paragraphs of visionary editorial commentary aimed to fit on a single page. Formatted with HTML <p> tags]",
         "market_stats": [
             {{"label": "[Metric 1, e.g. AI Investment]", "value": "[Value, e.g. $2.5B]"}},
             {{"label": "[Metric 2, e.g. New Models]", "value": "[Value]"}},
@@ -2672,10 +2677,12 @@ def generate_magazine_content_with_ai(articles, api_key=None):
         ],
         "articles": [
             {{
+                "article_index": [Number N of the "Article N" above that this story is based on],
                 "category": "[One of: Strategy, Technology, Ethics, Industry]",
-                "title": "[Engaging Magazine Headline]",
-                "lead": "[Compelling lead paragraph, 2-3 sentences (approximately 40-60 words) that hook the reader. This word count is included in the 350-400 word total.]",
-                "content": "[Main content in HTML format with <h3> subheadings and <p> paragraphs. STRICT WORD COUNT: Total word count (lead + this content) MUST be exactly 350-400 words - NO MORE, NO LESS. The main content should be 290-340 words (lead is 40-60 words). Generate 3-4 well-developed paragraphs (each 60-90 words) plus 1-2 subheadings. DO NOT exceed 400 words total - this causes page overflow (even 2 lines over is unacceptable). DO NOT go below 350 words total - this creates excessive whitespace. Aim for 360-380 words total for optimal page fill without overflow. This applies to ALL articles including the first one - there are NO exceptions. Use proper HTML structure with <h3> for subheadings and <p> for paragraphs.]",
+                "title": "[Engaging Magazine Headline, max 12 words]",
+                "lead": "[Compelling lead paragraph, 2 sentences (approximately 35-45 words) that hook the reader. This word count is included in the 230-260 word total.]",
+                "content": "[Main content in HTML format with <h3> subheadings and <p> paragraphs. STRICT WORD COUNT: Total word count (lead + this content) MUST be 230-260 words - NO MORE, NO LESS. The main content should be 190-215 words (lead is 35-45 words). Generate 3 well-developed paragraphs (each 60-70 words) plus 1-2 subheadings. DO NOT exceed 260 words total - this causes page overflow (even 2 lines over is unacceptable). DO NOT go below 230 words total - this creates excessive whitespace. Aim for 240-255 words total for optimal page fill without overflow. This applies to ALL articles including the first one - there are NO exceptions. Use proper HTML structure with <h3> for subheadings and <p> for paragraphs.]",
+                "image_query": "[3-5 English words describing a real, specific photo for this story, e.g. data center server racks]",
                 "source": "[Original Source Name]",
                 "score": "[Relevance Score 1-10]"
             }},
@@ -2687,17 +2694,18 @@ def generate_magazine_content_with_ai(articles, api_key=None):
     1. Ensure all double quotes inside string values are properly escaped with backslash (\").
     2. Do not use Markdown line breaks or trailing commas that invalidate JSON.
     3. Output MUST be a single valid JSON string.
-    4. STRICT WORD COUNT ENFORCEMENT FOR ALL ARTICLES (NO EXCEPTIONS): 
-       - Each article's total word count (lead paragraph + main content) MUST be between 350-400 words.
-       - MINIMUM: 350 words (never shorter - creates excessive whitespace).
-       - MAXIMUM: 400 words (never longer - causes page overflow - even 2 lines over is unacceptable).
-       - OPTIMAL RANGE: 360-380 words per article for perfect page fill without any overflow.
+    4. STRICT WORD COUNT ENFORCEMENT FOR ALL ARTICLES (NO EXCEPTIONS):
+       - Each article's total word count (lead paragraph + main content) MUST be between 230-260 words.
+       - MINIMUM: 230 words (never shorter - creates excessive whitespace).
+       - MAXIMUM: 260 words (never longer - causes page overflow - even 2 lines over is unacceptable).
+       - OPTIMAL RANGE: 240-255 words per article for perfect page fill without any overflow.
        - The FIRST article follows the SAME rules as all other articles - it is NOT allowed to be longer.
        - Count words carefully for EACH of the 8 articles individually.
-       - If any article exceeds 400 words, you MUST condense it to fit within the limit.
-       - If any article is below 350 words, you MUST expand it to reach at least 350 words.
-       - Consistency is critical - all 8 articles must be similar in length (360-380 words each).
+       - If any article exceeds 260 words, you MUST condense it to fit within the limit.
+       - If any article is below 230 words, you MUST expand it to reach at least 230 words.
+       - Consistency is critical - all 8 articles must be similar in length (240-255 words each).
        - This ensures every page fits perfectly on one A4 page without overflow or excessive whitespace.
+    5. "article_index" must be the integer N of the source "Article N" - it is used to fetch that story's photo.
     """
 
     logger.info("Calling AWS Bedrock Claude API for magazine content generation...")
@@ -2726,67 +2734,19 @@ def generate_magazine_content_with_ai(articles, api_key=None):
         logger.error(f"Failed to decode magazine JSON: {e}")
         return None
 
-def render_magazine_pdf(content_data, output_filename="magazine.pdf"):
+def render_magazine_pdf(content_data, output_filename="magazine.pdf", source_articles=None):
     """
-    Render PDF using Jinja2 and WeasyPrint.
+    Render the premium one-column photo magazine (see magazine.py).
+    source_articles is the list the prompt numbered as "Article N"; it lets
+    each story use its own source photo.
     """
     if not WEASYPRINT_AVAILABLE:
         logger.error("WeasyPrint not available (missing GTK or module). Cannot generate PDF.")
         return None
 
     try:
-        # Setup Jinja2
-        template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
-        env = Environment(loader=FileSystemLoader(template_dir))
-        template = env.get_template('magazine.html')
-        
-        # Inject default images if available
-        import glob
-        import random
-        import pathlib
-        
-        images_dir = os.path.join(template_dir, 'images')
-        available_images = []
-        if os.path.exists(images_dir):
-            available_images = (
-                glob.glob(os.path.join(images_dir, '*.jpg')) +
-                glob.glob(os.path.join(images_dir, '*.png')) +
-                glob.glob(os.path.join(images_dir, '*.jpeg')) +
-                glob.glob(os.path.join(images_dir, '*.webp'))
-            )
-        
-        # Assign images to articles (round-robin or random)
-        if 'articles' in content_data:
-            for article in content_data['articles']:
-                if available_images:
-                    # Convert to file URI safely handling spaces/OS specifics
-                    img_path = random.choice(available_images)
-                    article['local_image_path'] = pathlib.Path(img_path).as_uri()
-        
-        # Inject Cover Image and Logo
-        cover_path = os.path.join(images_dir, 'cover_generated.png')
-        if os.path.exists(cover_path):
-            content_data['cover_image_path'] = pathlib.Path(cover_path).as_uri()
-            
-        logo_path = os.path.join(images_dir, 'TransformiX logo .png')
-        if os.path.exists(logo_path):
-            content_data['logo_path'] = pathlib.Path(logo_path).as_uri()
-
-        # Inject Back Cover Image
-        back_cover_path = os.path.join(images_dir, 'back_cover_generated.png')
-        if os.path.exists(back_cover_path):
-            content_data['back_cover_path'] = pathlib.Path(back_cover_path).as_uri()
-
-        # Render HTML
-        html_out = template.render(**content_data)
-        
-        # Convert to PDF
-        css_path = os.path.join(template_dir, 'magazine.css')
-        HTML(string=html_out, base_url=template_dir).write_pdf(
-            output_filename, 
-            stylesheets=[CSS(css_path)]
-        )
-        return output_filename
+        import magazine
+        return magazine.render(content_data, output_filename, source_articles=source_articles)
     except Exception as e:
         logger.error(f"PDF rendering error: {e}")
         return None
@@ -2844,7 +2804,7 @@ async def generate_magazine(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         # 3. Render PDF
         filename = f"Transformix_AI_Magazine_{datetime.now().strftime('%B_%Y')}.pdf"
-        pdf_path = render_magazine_pdf(magazine_data, filename)
+        pdf_path = render_magazine_pdf(magazine_data, filename, source_articles=enhanced_articles[:40])
         
         if pdf_path and os.path.exists(pdf_path):
              await message.reply_document(

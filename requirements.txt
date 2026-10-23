@@ -11,3 +11,4 @@ readability-lxml==0.8.1
 lxml_html_clean==0.1.1
 boto3>=1.34.0
 python-dotenv>=1.0.0
+Pillow>=10.0
